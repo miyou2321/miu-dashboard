@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>米优的工作台</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  overflow: hidden;
+  background: #0d1117;
+  transition: background 0.3s;
+}
+
+/* ===== 深色主题（默认） ===== */
+:root {
+  --bg: #0d1117;
+  --sidebar: #161b22;
+  --sidebar-text: #7dd3fc;
+  --card: #21262d;
+  --card-text: #e6edf3;
+  --accent: #38bdf8;
+  --accent-light: rgba(56,189,248,0.12);
+  --border: rgba(255,255,255,0.06);
+  --shadow: rgba(56,189,248,0.06);
+  --greeting-bg: linear-gradient(135deg, #1e3a5f 0%, #0d2847 100%);
+  --greeting-text: #ffffff;
+  --greeting-sub: rgba(230,237,243,0.5);
+  --greeting-time: rgba(125,211,252,0.7);
+  --input-bg: #0d1117;
+  --checkbox-checked-bg: #38bdf8;
+  --streak-bg: rgba(56,189,248,0.12);
+  --nav-active-bg: rgba(56,189,248,0.12);
+  --nav-active-text: #38bdf8;
+  --progress-bg: rgba(255,255,255,0.06);
+  --avatar-glow: rgba(56,189,248,0.3);
+  --avatar-glow-hover: rgba(56,189,248,0.5);
+}
+
+/* ===== 浅色主题 ===== */
+body.light-mode {
+  --bg: #f0f4f8;
+  --sidebar: #ffffff;
+  --sidebar-text: #1e3a5f;
+  --card: #ffffff;
+  --card-text: #1e293b;
+  --accent: #0ea5e9;
+  --accent-light: rgba(14,165,233,0.1);
+  --border: rgba(0,0,0,0.06);
+  --shadow: rgba(14,165,233,0.06);
+  --greeting-bg: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  --greeting-text: #0c4a6e;
+  --greeting-sub: rgba(30,41,59,0.5);
+  --greeting-time: rgba(14,116,144,0.6);
+  --input-bg: #f8fafc;
+  --checkbox-checked-bg: #0ea5e9;
+  --streak-bg: rgba(14,165,233,0.1);
+  --nav-active-bg: rgba(14,165,233,0.1);
+  --nav-active-text: #0ea5e9;
+  --progress-bg: rgba(0,0,0,0.06);
+  --avatar-glow: rgba(14,165,233,0.2);
+  --avatar-glow-hover: rgba(14,165,233,0.4);
+}
+
+/* 手机模拟框 */
+.phone-frame {
+  max-width: 420px;
+  margin: 0 auto;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+  transition: background 0.3s;
+}
+
+/* 布局 */
+.layout {
+  display: flex;
+  height: 100%;
+}
+.sidebar {
+  width: 88px;
+  background: var(--sidebar);
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  transition: background 0.3s;
+  height: 100%;
+  min-height: 100%;
+}
+
+/* 头像区域 */
+.avatar-wrap, label.avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+  cursor: pointer;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+label.avatar-wrap {
+  text-decoration: none;
+  color: inherit;
+}
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #0ea5e9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 12px var(--avatar-glow);
+  transition: all 0.2s;
+  overflow: hidden;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar-wrap:hover .avatar {
+  box-shadow: 0 0 20px var(--avatar-glow-hover);
+}
+.avatar-wrap::after {
+  content: "点击换头像";
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.avatar-wrap:hover::after {
+  opacity: 1;
+}
+.greeting-avatar, label.greeting-avatar {
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.greeting-avatar:hover, label.greeting-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 24px var(--avatar-glow-hover);
+}
+.avatar-edit {
+  position: absolute;
+  bottom: 18px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  border: 2px solid var(--sidebar);
+  color: #fff;
+}
+.sidebar-brand {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sidebar-text);
+  margin-top: 4px;
+  text-align: center;
+  line-height: 1.3;
+  transition: color 0.3s;
+}
+
+.nav-item {
+  width: 64px;
+  padding: 8px 4px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--sidebar-text);
+  opacity: 0.55;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.nav-item[data-page="settings"] {
+  margin-top: auto;
+  opacity: 0.7;
+}
+.nav-item .nav-icon { font-size: 18px; display: block; margin-bottom: 3px; }
+.nav-item.active {
+  background: var(--nav-active-bg);
+  opacity: 1;
+  font-weight: 600;
+  color: var(--nav-active-text);
+}
+
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 主题切换按钮 */
+.theme-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 2px 8px var(--shadow);
+  color: var(--card-text);
+}
+
+/* 问候语区域 */
+.greeting-card {
+  background: var(--greeting-bg);
+  border-radius: 20px;
+  padding: 20px 16px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.greeting-card::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, var(--accent-light) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.greeting-time {
+  font-size: 12px;
+  color: var(--greeting-time);
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+.greeting-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--greeting-text);
+  margin-bottom: 6px;
+  transition: color 0.3s;
+}
+.greeting-sub {
+  font-size: 12px;
+  color: var(--greeting-sub);
+  transition: color 0.3s;
+}
+.greeting-avatar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent) 0%, #0ea5e9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border: 2px solid var(--accent-light);
+  box-shadow: 0 4px 16px var(--shadow);
+  overflow: hidden;
+}
+.greeting-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 卡片 */
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px var(--shadow);
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.card-icon {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--card-text);
+  transition: color 0.3s;
+}
+.card-body {
+  font-size: 13px;
+  color: var(--card-text);
+  opacity: 0.75;
+  line-height: 1.6;
+  transition: color 0.3s;
+}
+
+/* 交互元素 */
+.todo-item, .pill-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  transition: border-color 0.3s;
+}
+.todo-item:last-child, .pill-item:last-child { border-bottom: none; }
+.checkbox {
+  width: 20px; height: 20px;
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.checkbox.checked { background: var(--checkbox-checked-bg); }
+.checkbox.checked::after {
+  content: "✓";
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+.streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--streak-bg);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 6px;
+}
+.input-box {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--input-bg);
+  font-size: 13px;
+  margin-top: 8px;
+  color: var(--card-text);
+  outline: none;
+  transition: all 0.3s;
+}
+.input-box:focus {
+  border-color: var(--accent);
+}
+.timer-btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+}
+.timer-btn:active { opacity: 0.8; }
+.timer-btn.secondary {
+  background: var(--card);
+  color: var(--card-text);
+  border: 1.5px solid var(--border);
+}
+.timer-btn.secondary:hover {
+  border-color: var(--accent);
+}
+.timer-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.timer-presets {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.preset-btn {
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  color: var(--card-text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.preset-btn:hover, .preset-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+.timer-display-wrap {
+  text-align: center;
+  margin: 8px 0;
+}
+.timer-display {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+.timer-display:hover {
+  background: var(--accent-light);
+}
+.timer-edit-input {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--input-bg);
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 4px 8px;
+  width: 120px;
+  text-align: center;
+  outline: none;
+}
+.timer-btn.secondary {
+  background: var(--card);
+  color: var(--card-text);
+  border: 1.5px solid var(--border);
+}
+.timer-btn.secondary:hover {
+  border-color: var(--accent);
+}
+.timer-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.timer-presets {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.preset-btn {
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  color: var(--card-text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.preset-btn:hover, .preset-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+.timer-display-wrap {
+  text-align: center;
+  margin: 8px 0;
+}
+.timer-display {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+.timer-display:hover {
+  background: var(--accent-light);
+}
+.timer-edit-input {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--input-bg);
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 4px 8px;
+  width: 120px;
+  text-align: center;
+  outline: none;
+}
+.tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--accent-light);
+  font-size: 11px;
+  color: var(--accent);
+  margin-right: 4px;
+  margin-top: 4px;
+}
+.progress-bar {
+  height: 6px;
+  background: var(--progress-bg);
+  border-radius: 3px;
+  margin-top: 8px;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+/* 双列卡片 */
+.card-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.card-half {
+  flex: 1;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 2px 8px var(--shadow);
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.card-half .value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 6px 0;
+  transition: color 0.3s;
+}
+.card-half .label {
+  font-size: 12px;
+  color: var(--greeting-sub);
+  transition: color 0.3s;
+}
+
+/* 隐藏的文件输入 */
+#avatarInput { display: none; }
+
+/* 滚动条美化 */
+.main::-webkit-scrollbar { width: 3px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <!-- 主题切换 -->
+  <div class="theme-toggle" onclick="toggleTheme()" title="切换深色/浅色模式">🌙</div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <label for="avatarInput" class="avatar-wrap">
+        <div class="avatar" id="sidebarAvatar">📚</div>
+        <div class="avatar-edit">✎</div>
+        <div class="sidebar-brand">米优台</div>
+      </label>
+      <div class="nav-item active" data-page="home"><span class="nav-icon">🏠</span>首页</div>
+      <div class="nav-item" data-page="pills"><span class="nav-icon">💊</span>吃药</div>
+      <div class="nav-item" data-page="todo"><span class="nav-icon">✅</span>计划</div>
+      <div class="nav-item" data-page="study"><span class="nav-icon">📚</span>学习</div>
+      <div class="nav-item" data-page="duo"><span class="nav-icon">🦉</span>多邻国</div>
+      <div class="nav-item" data-page="ideas"><span class="nav-icon">💡</span>选题</div>
+      <div class="nav-item" data-page="schedule"><span class="nav-icon">📅</span>排期</div>
+      <div class="nav-item" data-page="review"><span class="nav-icon">🌙</span>复盘</div>
+      <div class="nav-item" data-page="materials"><span class="nav-icon">📝</span>素材</div>
+      <div style="flex:1"></div>
+      <div class="nav-item" data-page="settings"><span class="nav-icon">⚙️</span>设置</div>
+    </div>
+
+    <div class="main" id="mainContent">
+      <!-- 内容由JS动态渲染 -->
+    </div>
+  </div>
+</div>
+
+<input type="file" id="avatarInput" accept="image/*" onchange="handleAvatarChange(event)">
+
+<script>
+// ===== 数据存储 =====
+const Store = {
+  prefix: 'miyou_',
+  get(key) { try { return JSON.parse(localStorage.getItem(this.prefix + key)); } catch { return null; } },
+  set(key, val) { localStorage.setItem(this.prefix + key, JSON.stringify(val)); },
+  remove(key) { localStorage.removeItem(this.prefix + key); }
+};
+
+// 初始化数据
+function initData() {
+  if (!Store.get('todos')) {
+    Store.set('todos', [
+      { id: 1, text: '晨会汇报材料', done: true },
+      { id: 2, text: '完成 Python 第3章', done: false },
+      { id: 3, text: '写小红书笔记', done: false },
+      { id: 4, text: '多邻国 30 分钟', done: false }
+    ]);
+  }
+  if (!Store.get('pills')) {
+    Store.set('pills', [
+      { id: 1, name: '维生素', time: '早上 8:00', taken: true },
+      { id: 2, name: '钙片', time: '晚上 21:00', taken: false }
+    ]);
+  }
+  if (!Store.get('pillStreak')) Store.set('pillStreak', 12);
+  if (!Store.get('duoStreak')) Store.set('duoStreak', 23);
+  if (!Store.get('duoXP')) Store.set('duoXP', 45);
+  if (!Store.get('studyHours')) Store.set('studyHours', 3.5);
+  if (!Store.get('studyGoal')) Store.set('studyGoal', 10);
+  if (!Store.get('studyRecords')) {
+    Store.set('studyRecords', [
+      { date: '今天', content: 'Python 函数与模块', minutes: 45 },
+      { date: '昨天', content: '英语听力练习', minutes: 30 },
+      { date: '前天', content: '小红书运营技巧', minutes: 60 }
+    ]);
+  }
+  if (!Store.get('ideas')) {
+    Store.set('ideas', ['Python入门', '效率工具', '读书笔记', '多邻国经验']);
+  }
+  if (!Store.get('timerDefault')) Store.set('timerDefault', 25);
+  if (!Store.get('avatar')) Store.set('avatar', null);
+  if (!Store.get('theme')) Store.set('theme', 'dark');
+  if (!Store.get('schedules')) Store.set('schedules', []);
+  if (!Store.get('reviews')) Store.set('reviews', {});
+  if (!Store.get('materials')) Store.set('materials', []);
+  if (!Store.get('ideaNotes')) Store.set('ideaNotes', []);
+  if (!Store.get('duoHistory')) Store.set('duoHistory', {});
+  if (!Store.get('duoGoal')) Store.set('duoGoal', 50);
+  if (!Store.get('pillHistory')) Store.set('pillHistory', {});
+  if (!Store.get('homeLayout')) {
+    Store.set('homeLayout', [
+      { id: 'greeting', show: true },
+      { id: 'todo', show: true },
+      { id: 'pills', show: true },
+      { id: 'timer', show: true },
+      { id: 'stats', show: true },
+      { id: 'schedule', show: true },
+      { id: 'ideas', show: true },
+      { id: 'study', show: true }
+    ]);
+  }
+}
+
+// ===== 问候语 =====
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return '早上好';
+  if (hour < 18) return '下午好';
+  return '晚上好';
+}
+
+function getDateStr() {
+  const d = new Date();
+  const weeks = ['日','一','二','三','四','五','六'];
+  return `${d.getMonth()+1}月${d.getDate()}日 星期${weeks[d.getDay()]}`;
+}
+
+function getGreetingSub() {
+  const hour = new Date().getHours();
+  if (hour < 12) return '新的一天，元气满满 ☀️';
+  if (hour < 18) return '午后时光，继续加油 💪';
+  return '今天也是充实的一天 ✨';
+}
+
+// ===== 主题切换 =====
+function toggleTheme() {
+  const body = document.body;
+  const btn = document.querySelector('.theme-toggle');
+  const isLight = body.classList.toggle('light-mode');
+  Store.set('theme', isLight ? 'light' : 'dark');
+  btn.textContent = isLight ? '☀️' : '🌙';
+  btn.title = isLight ? '切换到深色模式' : '切换到浅色模式';
+}
+
+function applyTheme() {
+  const theme = Store.get('theme') || 'dark';
+  const body = document.body;
+  const btn = document.querySelector('.theme-toggle');
+  if (theme === 'light') {
+    body.classList.add('light-mode');
+    btn.textContent = '☀️';
+    btn.title = '切换到深色模式';
+  } else {
+    body.classList.remove('light-mode');
+    btn.textContent = '🌙';
+    btn.title = '切换到浅色模式';
+  }
+}
+
+// ===== 头像 =====
+function handleAvatarChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    alert('请选择图片文件');
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    alert('图片太大啦，请选 2MB 以内的');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const dataUrl = ev.target.result;
+    Store.set('avatar', dataUrl);
+    updateAvatars(dataUrl);
+    // 刷新当前页面以更新所有头像
+    renderPage(currentPage);
+  };
+  reader.onerror = function() {
+    alert('读取图片失败，请重试');
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateAvatars(url) {
+  const sidebar = document.getElementById('sidebarAvatar');
+  const greeting = document.getElementById('greetingAvatar');
+  if (url) {
+    sidebar.innerHTML = `<img src="${url}" alt="avatar">`;
+    if (greeting) greeting.innerHTML = `<img src="${url}" alt="avatar">`;
+  } else {
+    sidebar.textContent = '📚';
+    if (greeting) greeting.textContent = '📚';
+  }
+}
+
+function loadAvatar() {
+  const avatar = Store.get('avatar');
+  if (avatar) updateAvatars(avatar);
+}
+
+// ===== 页面渲染 =====
+let currentPage = 'home';
+
+function renderHome() {
+  try {
+    const todos = Store.get('todos') || [];
+    const pills = Store.get('pills') || [];
+    const studyHours = Store.get('studyHours') || 0;
+    const studyGoal = Store.get('studyGoal') || 10;
+    const duoStreak = Store.get('duoStreak') || 0;
+    const duoXP = Store.get('duoXP') || 0;
+    const studyRecords = Store.get('studyRecords') || [];
+    const ideas = Store.get('ideas') || [];
+    const pillStreak = Store.get('pillStreak') || 0;
+    const schedules = Store.get('schedules') || [];
+    let layout = Store.get('homeLayout');
+    if (!Array.isArray(layout) || layout.length === 0) {
+      layout = [
+        { id: 'greeting', show: true },
+        { id: 'todo', show: true },
+        { id: 'pills', show: true },
+        { id: 'timer', show: true },
+        { id: 'stats', show: true },
+        { id: 'schedule', show: true },
+        { id: 'ideas', show: true },
+        { id: 'study', show: true }
+      ];
+      Store.set('homeLayout', layout);
+    }
+    const now = new Date();
+    const avatar = Store.get('avatar');
+    const avatarHtml = avatar ? '<img src="' + avatar + '" alt="avatar">' : '📚';
+
+    let html = '';
+
+    // 问候语
+    if (layout.find(x => x.id === 'greeting' && x.show)) {
+      html += '<div class="greeting-card">' +
+        '<div class="greeting-time">' + getDateStr() + '</div>' +
+        '<div class="greeting-text">' + getGreeting() + '，米优</div>' +
+        '<div class="greeting-sub">' + getGreetingSub() + '</div>' +
+        '<label for="avatarInput" class="greeting-avatar" id="greetingAvatar">' + avatarHtml + '</label>' +
+      '</div>';
+    }
+
+    // 今日计划
+    if (layout.find(x => x.id === 'todo' && x.show)) {
+      let todoHtml = '';
+      for (let i = 0; i < Math.min(todos.length, 4); i++) {
+        const t = todos[i];
+        todoHtml += '<div class="todo-item" onclick="toggleTodo(' + t.id + ')">' +
+          '<div class="checkbox ' + (t.done ? 'checked' : '') + '"></div>' +
+          '<span style="' + (t.done ? 'text-decoration:line-through;opacity:0.4' : '') + '">' + t.text + '</span>' +
+        '</div>';
+      }
+      if (todos.length > 4) {
+        todoHtml += '<div style="font-size:12px;opacity:0.5;text-align:center;margin-top:4px" onclick="renderPage(&#39;todo&#39;)">查看更多 →</div>';
+      }
+      html += '<div class="card">' +
+        '<div class="card-header"><div class="card-icon">✅</div><div class="card-title">今日计划</div></div>' +
+        '<div class="card-body">' + todoHtml +
+          '<input class="input-box" placeholder="+ 添加新任务..." onkeydown="if(event.key===\"Enter\"){addTodo(this.value);this.value=\"\"}">' +
+        '</div></div>';
+    }
+
+    // 吃药打卡
+    if (layout.find(x => x.id === 'pills' && x.show)) {
+      let pillHtml = '';
+      for (let i = 0; i < pills.length; i++) {
+        const p = pills[i];
+        pillHtml += '<div class="pill-item" onclick="togglePill(' + p.id + ')">' +
+          '<div class="checkbox ' + (p.taken ? 'checked' : '') + '"></div>' +
+          '<span style="' + (p.taken ? 'text-decoration:line-through;opacity:0.4' : '') + '">' + p.time + ' · ' + p.name + '</span>' +
+        '</div>';
+      }
+      html += '<div class="card">' +
+        '<div class="card-header"><div class="card-icon">💊</div><div class="card-title">吃药打卡</div></div>' +
+        '<div class="card-body">' + pillHtml +
+          '<div class="streak">🔥 连续打卡 ' + pillStreak + ' 天</div>' +
+        '</div></div>';
+    }
+
+    // 专注计时
+    if (layout.find(x => x.id === 'timer' && x.show)) {
+      html += '<div class="card">' +
+        '<div class="card-header"><div class="card-icon">⏱️</div><div class="card-title">专注计时</div></div>' +
+        '<div class="card-body">' +
+          '<div class="timer-display-wrap"><div class="timer-display" id="timerDisplay" onclick="editTimer()">25:00</div></div>' +
+          '<div class="timer-controls">' +
+            '<button class="timer-btn secondary" id="resetBtn" onclick="resetTimer()">⏹ 重置</button>' +
+            '<button class="timer-btn" id="timerBtn" onclick="toggleTimer()">▶ 开始</button>' +
+          '</div>' +
+          '<div class="timer-presets">' +
+            '<span class="preset-btn active" onclick="setPreset(15)">15分</span>' +
+            '<span class="preset-btn" onclick="setPreset(25)">25分</span>' +
+            '<span class="preset-btn" onclick="setPreset(45)">45分</span>' +
+            '<span class="preset-btn" onclick="setPreset(60)">60分</span>' +
+          '</div>' +
+        '</div></div>';
+    }
+
+    // 数据双列
+    if (layout.find(x => x.id === 'stats' && x.show)) {
+      html += '<div class="card-row">' +
+        '<div class="card-half">' +
+          '<div class="card-header" style="margin-bottom:4px"><div class="card-icon">📚</div><div class="card-title" style="font-size:13px">本周学习</div></div>' +
+          '<div class="value">' + studyHours + 'h</div>' +
+          '<div class="label">目标 ' + studyGoal + ' 小时</div>' +
+          '<div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:' + Math.min((studyHours/studyGoal)*100,100) + '%"></div></div>' +
+        '</div>' +
+        '<div class="card-half">' +
+          '<div class="card-header" style="margin-bottom:4px"><div class="card-icon">🦉</div><div class="card-title" style="font-size:13px">多邻国</div></div>' +
+          '<div class="value">' + duoStreak + '</div>' +
+          '<div class="label">连胜天数</div>' +
+          '<div class="streak" style="margin-top:8px">🔥 今日 ' + duoXP + 'XP</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    // 内容排期
+    if (layout.find(x => x.id === 'schedule' && x.show)) {
+      let scheduleHtml = '';
+      const upcoming = [];
+      for (let i = 0; i < schedules.length; i++) {
+        if (new Date(schedules[i].date) >= now) upcoming.push(schedules[i]);
+      }
+      upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const showList = upcoming.slice(0, 3);
+
+      if (showList.length === 0) {
+        scheduleHtml = '<p style="opacity:0.5;font-size:13px">暂无 upcoming 排期</p>';
+      } else {
+        for (let i = 0; i < showList.length; i++) {
+          const s = showList[i];
+          const d = new Date(s.date);
+          const daysLeft = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+          const bg = daysLeft <= 3 ? 'rgba(245,158,11,0.15)' : 'var(--accent-light)';
+          const color = daysLeft <= 3 ? '#f59e0b' : 'var(--accent)';
+          const dayText = daysLeft === 0 ? '今天' : daysLeft + '天后';
+          scheduleHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">' +
+            '<div><div style="font-weight:600;font-size:13px">' + s.title + '</div>' +
+            '<div style="font-size:11px;opacity:0.5">' + (s.platform || '未指定平台') + '</div></div>' +
+            '<span style="font-size:12px;padding:2px 8px;border-radius:6px;background:' + bg + ';color:' + color + '">' + dayText + '</span>' +
+          '</div>';
+        }
+      }
+      html += '<div class="card">' +
+        '<div class="card-header"><div class="card-icon">📅</div><div class="card-title">内容排期</div></div>' +
+        '<div class="card-body">' + scheduleHtml +
+          '<div style="margin-top:8px;font-size:12px;opacity:0.6;text-align:center;cursor:pointer;color:var(--accent)" onclick="renderPage(&#39;schedule&#39;)">查看全部 →</div>' +
+        '</div></div>';
+    }
+
+    // 选题池
+    if (layout.find(x => x.id === 'ideas' && x.show)) {
+      let ideaTags = '';
+      for (let i = 0; i < ideas.length; i++) {
+        ideaTags += '<span class="tag">' + ideas[i] + '</span>';
+      }
+      html += '<div class="card">' +
+        '<div class="card-header"><div class="card-icon">💡</div><div class="card-title">选题池</div></div>' +
+        '<div class="card-body">' + ideaTags +
+          '<input class="input-box" placeholder="+ 丢个新选题..." onkeydown="if(event.key===\"Enter\"){addIdea(this.value);this.value=\"\"}">' +
+        '</div></div>';
+    }
+
+    // 学习记录
+    if (layout.find(x => x.id === 'study' && x.show)) {
+      let studyHtml = '';
+      for (let i = 0; i < Math.min(studyRecords.length, 3); i++) {
+        const r = studyRecords[i];
+        const opacity = r.date === '前天' ? 'opacity:0.4;font-size:12px' : r.date === '昨天' ? 'opacity:0.6' : '';
+        studyHtml += '<div style="margin-bottom:6px;' + opacity + '"><strong>' + r.date + '</strong> · ' + r.content + ' · ' + r.minutes + '分钟</div>';
+      }
+      html += '<div class="card">' +
+        '<div class="card-header"><div class="card-icon">📚</div><div class="card-title">学习记录</div></div>' +
+        '<div class="card-body">' + studyHtml +
+          '<input class="input-box" placeholder="+ 记录今天学了什么..." onkeydown="if(event.key===\"Enter\"){addStudy(this.value);this.value=\"\"}">' +
+        '</div></div>';
+    }
+
+    html += '<div style="text-align:center;padding:20px 0;font-size:11px;color:var(--greeting-sub);opacity:0.3">米优的工作台 · 2026</div>';
+    return html;
+  } catch (err) {
+    console.error('renderHome error:', err);
+    return '<div class="card"><div class="card-body"><p style="text-align:center;color:#ef4444;padding:20px">首页渲染出错: ' + err.message + '<br><br><button class="timer-btn" onclick="localStorage.removeItem(\"miyou_homeLayout\");location.reload()">重置首页布局</button></p></div></div>';
+  }
+}
+
+function renderPillsPage() {
+  const pills = Store.get('pills') || [];
+  const streak = Store.get('pillStreak') || 0;
+  const today = new Date().toISOString().split('T')[0];
+  const history = Store.get('pillHistory') || {};
+  const todayTaken = history[today] || [];
+
+  return `
+    <div class="card">
+      <div class="card-header"><div class="card-icon">💊</div><div class="card-title">吃药打卡</div></div>
+      <div class="card-body">
+        <div class="streak" style="margin-bottom:12px">🔥 连续打卡 ${streak} 天</div>
+        ${pills.map((p, i) => `
+          <div class="pill-item" style="padding:10px 0">
+            <div class="checkbox ${p.taken ? 'checked' : ''}" onclick="togglePillDetail(${p.id})"></div>
+            <div style="flex:1">
+              <div style="font-weight:600">${p.name}</div>
+              <div style="font-size:12px;opacity:0.6">${p.time}</div>
+            </div>
+            <span style="font-size:18px;cursor:pointer;padding:4px" onclick="deletePill(${p.id})">🗑</span>
+          </div>
+        `).join('')}
+        <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px">
+          <input class="input-box" id="newPillName" placeholder="药品名称" style="margin-bottom:6px">
+          <input class="input-box" id="newPillTime" placeholder="服用时间，如：早上 8:00" onkeydown="if(event.key==='Enter')addPill()">
+          <button class="timer-btn" style="margin-top:8px" onclick="addPill()">+ 添加药品</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon">📅</div><div class="card-title">本周记录</div></div>
+      <div class="card-body">
+        ${[0,1,2,3,4,5,6].map(d => {
+          const date = new Date();
+          date.setDate(date.getDate() - d);
+          const dateStr = date.toISOString().split('T')[0];
+          const dayPills = history[dateStr] || [];
+          const dayName = d === 0 ? '今天' : d === 1 ? '昨天' : `${date.getMonth()+1}/${date.getDate()}`;
+          const allTaken = pills.length > 0 && pills.every(p => dayPills.includes(p.id));
+          return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+            <span>${dayName}</span>
+            <span style="color:${allTaken ? 'var(--accent)' : 'var(--greeting-sub)'}">${allTaken ? '✓ 已完成' : dayPills.length > 0 ? dayPills.length + ' / ' + pills.length : '未打卡'}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function togglePillDetail(id) {
+  const pills = Store.get('pills') || [];
+  const p = pills.find(x => x.id === id);
+  if (!p) return;
+  p.taken = !p.taken;
+  Store.set('pills', pills);
+
+  // 记录历史
+  const today = new Date().toISOString().split('T')[0];
+  const history = Store.get('pillHistory') || {};
+  if (!history[today]) history[today] = [];
+  if (p.taken) {
+    if (!history[today].includes(id)) history[today].push(id);
+  } else {
+    history[today] = history[today].filter(x => x !== id);
+  }
+  Store.set('pillHistory', history);
+
+  // 检查今天是否全部完成，更新连胜
+  const allTaken = pills.every(x => x.taken);
+  if (allTaken) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yestStr = yesterday.toISOString().split('T')[0];
+    const yestHistory = Store.get('pillHistory') || {};
+    const yestPills = Store.get('pills') || [];
+    const yestAll = yestPills.length > 0 && yestPills.every(pp => (yestHistory[yestStr] || []).includes(pp.id));
+    if (yestAll) {
+      Store.set('pillStreak', (Store.get('pillStreak') || 0) + 1);
+    }
+  }
+  renderPage('pills');
+}
+
+function addPill() {
+  const name = document.getElementById('newPillName').value.trim();
+  const time = document.getElementById('newPillTime').value.trim();
+  if (!name || !time) return;
+  const pills = Store.get('pills') || [];
+  pills.push({ id: Date.now(), name, time, taken: false });
+  Store.set('pills', pills);
+  renderPage('pills');
+}
+
+function deletePill(id) {
+  if (!confirm('确定删除这个药品吗？')) return;
+  const pills = Store.get('pills') || [];
+  Store.set('pills', pills.filter(p => p.id !== id));
+  renderPage('pills');
+}
+
+// ===== 今日计划详细页面 =====
+function renderTodoPage() {
+  const todos = Store.get('todos') || [];
+  const doneCount = todos.filter(t => t.done).length;
+
+  return `
+    <div class="card">
+      <div class="card-header"><div class="card-icon">✅</div><div class="card-title">今日计划</div></div>
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:13px;opacity:0.7">完成进度</span>
+          <span style="font-size:18px;font-weight:700;color:var(--accent)">${doneCount}/${todos.length}</span>
+        </div>
+        <div class="progress-bar" style="margin-bottom:16px"><div class="progress-fill" style="width:${todos.length > 0 ? (doneCount/todos.length)*100 : 0}%"></div></div>
+        ${todos.map(t => `
+          <div class="todo-item" style="padding:10px 0">
+            <div class="checkbox ${t.done ? 'checked' : ''}" onclick="toggleTodoDetail(${t.id})"></div>
+            <span style="flex:1;${t.done ? 'text-decoration:line-through;opacity:0.4' : ''}">${t.text}</span>
+            <span style="font-size:18px;cursor:pointer;padding:4px" onclick="deleteTodo(${t.id})">🗑</span>
+          </div>
+        `).join('')}
+        <input class="input-box" placeholder="+ 添加新任务..." onkeydown="if(event.key==='Enter'){addTodoDetail(this.value);this.value=''}">
+      </div>
+    </div>
+  `;
+}
+
+function toggleTodoDetail(id) {
+  const todos = Store.get('todos') || [];
+  const t = todos.find(x => x.id === id);
+  if (t) { t.done = !t.done; Store.set('todos', todos); renderPage('todo'); }
+}
+
+function addTodoDetail(text) {
+  if (!text.trim()) return;
+  const todos = Store.get('todos') || [];
+  todos.push({ id: Date.now(), text: text.trim(), done: false });
+  Store.set('todos', todos);
+  renderPage('todo');
+}
+
+function deleteTodo(id) {
+  const todos = Store.get('todos') || [];
+  Store.set('todos', todos.filter(t => t.id !== id));
+  renderPage('todo');
+}
+
+// ===== 学习记录详细页面 =====
+function renderStudyPage() {
+  const records = Store.get('studyRecords') || [];
+  const totalMinutes = records.reduce((sum, r) => sum + (r.minutes || 0), 0);
+  const totalHours = (totalMinutes / 60).toFixed(1);
+
+  return `
+    <div class="card">
+      <div class="card-header"><div class="card-icon">📚</div><div class="card-title">学习统计</div></div>
+      <div class="card-body" style="text-align:center;padding:20px 0">
+        <div style="font-size:36px;font-weight:700;color:var(--accent)">${totalHours}h</div>
+        <div style="font-size:13px;opacity:0.6;margin-top:4px">累计学习时长</div>
+        <div style="font-size:13px;opacity:0.6;margin-top:4px">${records.length} 条记录</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon">📝</div><div class="card-title">学习记录</div></div>
+      <div class="card-body">
+        ${records.length === 0 ? '<p style="text-align:center;opacity:0.5;padding:20px 0">还没有学习记录</p>' : ''}
+        ${records.map((r, i) => `
+          <div style="padding:10px 0;border-bottom:1px solid var(--border);${i > 2 ? 'opacity:0.6' : ''}">
+            <div style="display:flex;justify-content:space-between">
+              <span style="font-weight:600">${r.content}</span>
+              <span style="color:var(--accent);font-weight:600">${r.minutes}分钟</span>
+            </div>
+            <div style="font-size:12px;opacity:0.5;margin-top:2px">${r.date}</div>
+          </div>
+        `).join('')}
+        <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px">
+          <input class="input-box" id="studyContent" placeholder="学习内容" style="margin-bottom:6px">
+          <input class="input-box" id="studyMinutes" placeholder="时长（分钟）" type="number" onkeydown="if(event.key==='Enter')addStudyDetail()">
+          <button class="timer-btn" style="margin-top:8px" onclick="addStudyDetail()">+ 添加记录</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function addStudyDetail() {
+  const content = document.getElementById('studyContent').value.trim();
+  const minutes = parseInt(document.getElementById('studyMinutes').value) || 30;
+  if (!content) return;
+  const records = Store.get('studyRecords') || [];
+  records.unshift({ date: '今天', content, minutes });
+  Store.set('studyRecords', records);
+  const hours = Store.get('studyHours') || 0;
+  Store.set('studyHours', +(hours + minutes/60).toFixed(1));
+  renderPage('study');
+}
+
+// ===== 多邻国详细页面 =====
+function renderDuoPage() {
+  const streak = Store.get('duoStreak') || 0;
+  const xp = Store.get('duoXP') || 0;
+  const goal = Store.get('duoGoal') || 50;
+  const history = Store.get('duoHistory') || [];
+
+  return `
+    <div class="card">
+      <div class="card-header"><div class="card-icon">🦉</div><div class="card-title">多邻国打卡</div></div>
+      <div class="card-body" style="text-align:center;padding:20px 0">
+        <div style="font-size:48px;font-weight:700;color:var(--accent)">${streak}</div>
+        <div style="font-size:14px;opacity:0.6">连胜天数 🔥</div>
+        <div style="margin-top:16px;display:flex;justify-content:center;gap:16px">
+          <div style="text-align:center">
+            <div style="font-size:24px;font-weight:700;color:var(--accent)">${xp}</div>
+            <div style="font-size:12px;opacity:0.5">今日 XP</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:24px;font-weight:700;color:var(--accent)">${goal}</div>
+            <div style="font-size:12px;opacity:0.5">目标 XP</div>
+          </div>
+        </div>
+        <div class="progress-bar" style="margin-top:12px"><div class="progress-fill" style="width:${Math.min((xp/goal)*100,100)}%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon">⚙️</div><div class="card-title">手动更新</div></div>
+      <div class="card-body">
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input class="input-box" id="duoStreakInput" placeholder="连胜天数" type="number" value="${streak}" style="flex:1">
+          <button class="timer-btn" style="width:auto;padding:8px 16px" onclick="updateDuoStreak()">更新</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input class="input-box" id="duoXPInput" placeholder="今日 XP" type="number" value="${xp}" style="flex:1">
+          <button class="timer-btn" style="width:auto;padding:8px 16px" onclick="updateDuoXP()">更新</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon">📅</div><div class="card-title">本周 XP</div></div>
+      <div class="card-body">
+        ${[0,1,2,3,4,5,6].map(d => {
+          const date = new Date();
+          date.setDate(date.getDate() - d);
+          const dateStr = date.toISOString().split('T')[0];
+          const dayXP = (Store.get('duoHistory') || {})[dateStr] || 0;
+          const dayName = d === 0 ? '今天' : d === 1 ? '昨天' : `${date.getMonth()+1}/${date.getDate()}`;
+          return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+            <span>${dayName}</span>
+            <span style="color:${dayXP > 0 ? 'var(--accent)' : 'var(--greeting-sub)'};font-weight:${dayXP > 0 ? '600' : '400'}">${dayXP} XP</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function updateDuoStreak() {
+  const val = parseInt(document.getElementById('duoStreakInput').value);
+  if (val >= 0) { Store.set('duoStreak', val); renderPage('duo'); }
+}
+
+function updateDuoXP() {
+  const val = parseInt(document.getElementById('duoXPInput').value);
+  if (val >= 0) {
+    Store.set('duoXP', val);
+    const today = new Date().toISOString().split('T')[0];
+    const history = Store.get('duoHistory') || {};
+    history[today] = val;
+    Store.set('duoHistory', history);
+    renderPage('duo');
+  }
+}
+
+// ===== 选题池详细页面 =====
+function renderIdeasPage() {
+  const ideas = Store.get('ideas') || [];
+
+  return `
+    <div class="card">
+      <div class="card-header"><div class="card-icon">💡</div><div class="card-title">选题池</div></div>
+      <div class="card-body">
+        <div style="margin-bottom:12px">
+          ${ideas.map((idea, i) => `
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+              <span class="tag" style="flex:1;margin:0">${idea}</span>
+              <span style="font-size:18px;cursor:pointer;padding:4px" onclick="deleteIdea(${i})">🗑</span>
+            </div>
+          `).join('')}
+        </div>
+        <input class="input-box" placeholder="+ 添加新选题..." onkeydown="if(event.key==='Enter'){addIdeaDetail(this.value);this.value=''}">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon">📝</div><div class="card-title">选题灵感</div></div>
+      <div class="card-body">
+        <textarea class="input-box" id="ideaNote" placeholder="记录更详细的选题想法..." style="min-height:80px;resize:vertical" onkeydown="if(event.key==='Enter' && event.ctrlKey){saveIdeaNote()}"></textarea>
+        <button class="timer-btn secondary" style="margin-top:8px" onclick="saveIdeaNote()">保存灵感</button>
+        <div id="ideaNotesDisplay" style="margin-top:12px">
+          ${(Store.get('ideaNotes') || []).map((n, i) => `
+            <div style="padding:8px;background:var(--input-bg);border-radius:8px;margin-bottom:6px;font-size:13px;position:relative">
+              ${n}
+              <span style="position:absolute;right:8px;top:8px;font-size:16px;cursor:pointer" onclick="deleteIdeaNote(${i})">×</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function deleteIdea(index) {
+  const ideas = Store.get('ideas') || [];
+  ideas.splice(index, 1);
+  Store.set('ideas', ideas);
+  renderPage('ideas');
+}
+
+function addIdeaDetail(text) {
+  if (!text.trim()) return;
+  const ideas = Store.get('ideas') || [];
+  ideas.push(text.trim());
+  Store.set('ideas', ideas);
+  renderPage('ideas');
+}
+
+function saveIdeaNote() {
+  const note = document.getElementById('ideaNote').value.trim();
+  if (!note) return;
+  const notes = Store.get('ideaNotes') || [];
+  notes.unshift(note);
+  Store.set('ideaNotes', notes);
+  renderPage('ideas');
+}
+
+function deleteIdeaNote(index) {
+  const notes = Store.get('ideaNotes') || [];
+  notes.splice(index, 1);
+  Store.set('ideaNotes', notes);
+  renderPage('ideas');
+}
+
+// ===== 内容排期详细页面 =====
+function renderSchedulePage() {
+  const schedules = Store.get('schedules') || [];
+  const now = new Date();
+
+  return `
+    <div class="card">
+      <div class="card-header"><div class="card-icon">📅</div><div class="card-title">内容排期</div></div>
+      <div class="card-body">
+        ${schedules.length === 0 ? '<p style="text-align:center;opacity:0.5;padding:20px 0">还没有排期</p>' : ''}
+        ${schedules.map((s, i) => {
+          const d = new Date(s.date);
+          const daysLeft = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+          const isOverdue = daysLeft < 0;
+          return `
+            <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-weight:600">${s.title}</span>
+                <span style="font-size:12px;padding:3px 8px;border-radius:6px;background:${isOverdue ? 'rgba(239,68,68,0.15)' : daysLeft <= 3 ? 'rgba(245,158,11,0.15)' : 'var(--accent-light)'};color:${isOverdue ? '#ef4444' : daysLeft <= 3 ? '#f59e0b' : 'var(--accent)'}">${isOverdue ? '已逾期 ' + Math.abs(daysLeft) + ' 天' : daysLeft === 0 ? '今天' : '还有 ' + daysLeft + ' 天'}</span>
+              </div>
+              <div style="font-size:12px;opacity:0.5;margin-top:4px">${s.date} · ${s.platform || '未指定平台'}</div>
+              <div style="font-size:12px;opacity:0.6;margin-top:2px">${s.note || ''}</div>
+              <div style="text-align:right;margin-top:4px">
+                <span style="font-size:16px;cursor:pointer;padding:4px" onclick="deleteSchedule(${i})">🗑</span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+        <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px">
+          <input class="input-box" id="scheduleTitle" placeholder="内容标题" style="margin-bottom:6px">
+          <input class="input-box" id="scheduleDate" placeholder="截止日期，如：2026-08-10" type="date" style="margin-bottom:6px">
+          <input class="input-box" id="schedulePlatform" placeholder="发布平台（小红书/公众号/抖音...）" style="margin-bottom:6px">
+          <input class="input-box" id="scheduleNote" placeholder="备注..." onkeydown="if(event.key==='Enter')addSchedule()">
+          <button class="timer-btn" style="margin-top:8px" onclick="addSchedule()">+ 添加排期</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function addSchedule() {
+  const title = document.getElementById('scheduleTitle').value.trim();
+  const date = document.getElementById('scheduleDate').value;
+  const platform = document.getElementById('schedulePlatform').value.trim();
+  const note = document.getElementById('scheduleNote').value.trim();
+  if (!title || !date) return;
+  const schedules = Store.get('schedules') || [];
+  schedules.push({ id: Date.now(), title, date, platform, note });
+  schedules.sort((a, b) => new Date(a.date) - new Date(b.date));
+  Store.set('schedules', schedules);
+  renderPage('schedule');
+}
+
+function deleteSchedule(index) {
+  const schedules = Store.get('schedules') || [];
+  schedules.splice(index, 1);
+  Store.set('schedules', schedules);
+  renderPage('schedule');
+}
+
+// ===== 每日复盘详细页面 =====
+function renderReviewPage() {
+  const today = new Date().toISOString().split('T')[0];
+  const reviews = Store.get('reviews') || {};
+  const todayReview = reviews[today] || '';
+  const allReviews = Object.entries(reviews).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 7);
+
+  return `
+    <div class="card">
+      <div class="card-header"><div class="card-icon">🌙</div><div class="card-title">今日复盘</div></div>
+      <div class="card-body">
+        <div style="font-size:12px;opacity:0.6;margin-bottom:8px">${today}</div>
+        <textarea class="input-box" id="todayReview" placeholder="今天学了什么？有什么收获？明天计划做什么？" style="min-height:120px;resize:vertical">${todayReview}</textarea>
+        <button class="timer-btn" style="margin-top:8px" onclick="saveReview()">💾 保存今日复盘</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon">📖</div><div class="card-title">历史复盘</div></div>
+      <div class="card-body">
+        ${allReviews.length === 0 ? '<p style="text-align:center;opacity:0.5;padding:20px 0">还没有历史复盘</p>' : ''}
+        ${allReviews.map(([date, text]) => {
+          const d = new Date(date);
+          const dayName = date === today ? '今天' : `${d.getMonth()+1}月${d.getDate()}日`;
+          return `
+            <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+              <div style="font-size:12px;opacity:0.5;margin-bottom:4px">${dayName}</div>
+              <div style="font-size:13px;line-height:1.6">${text}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function saveReview() {
+  const text = document.getElementById('todayReview').value.trim();
+  if (!text) return;
+  const today = new Date().toISOString().split('T')[0];
+  const reviews = Store.get('reviews') || {};
+  reviews[today] = text;
+  Store.set('reviews', reviews);
+  alert('复盘已保存 ✨');
+  renderPage('review');
+}
+
+// ===== 素材库详细页面 =====
+function renderMaterialsPage() {
+  const materials = Store.get('materials') || [];
+
+  return `
+    <div class="card">
+      <div class="card-header"><div class="card-icon">📝</div><div class="card-title">素材库</div></div>
+      <div class="card-body">
+        ${materials.length === 0 ? '<p style="text-align:center;opacity:0.5;padding:20px 0">还没有素材</p>' : ''}
+        ${materials.map((m, i) => `
+          <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:start">
+              <div style="flex:1">
+                <div style="font-weight:600">${m.title}</div>
+                <div style="font-size:12px;opacity:0.5;margin-top:2px">${m.url || ''}</div>
+                <div style="font-size:12px;opacity:0.6;margin-top:4px;line-height:1.5">${m.note || ''}</div>
+                <div style="margin-top:6px">${(m.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}</div>
+              </div>
+              <span style="font-size:18px;cursor:pointer;padding:4px" onclick="deleteMaterial(${i})">🗑</span>
+            </div>
+          </div>
+        `).join('')}
+        <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px">
+          <input class="input-box" id="materialTitle" placeholder="素材标题" style="margin-bottom:6px">
+          <input class="input-box" id="materialURL" placeholder="链接（可选）" style="margin-bottom:6px">
+          <input class="input-box" id="materialTags" placeholder="标签，用空格分隔" style="margin-bottom:6px">
+          <textarea class="input-box" id="materialNote" placeholder="备注..." style="min-height:60px;resize:vertical;margin-bottom:6px"></textarea>
+          <button class="timer-btn" style="margin-top:8px" onclick="addMaterial()">+ 添加素材</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function addMaterial() {
+  const title = document.getElementById('materialTitle').value.trim();
+  const url = document.getElementById('materialURL').value.trim();
+  const tags = document.getElementById('materialTags').value.trim().split(/\s+/).filter(Boolean);
+  const note = document.getElementById('materialNote').value.trim();
+  if (!title) return;
+  const materials = Store.get('materials') || [];
+  materials.unshift({ id: Date.now(), title, url, tags, note, date: new Date().toISOString().split('T')[0] });
+  Store.set('materials', materials);
+  renderPage('materials');
+}
+
+function deleteMaterial(index) {
+  const materials = Store.get('materials') || [];
+  materials.splice(index, 1);
+  Store.set('materials', materials);
+  renderPage('materials');
+}
+
+function renderPage(page) {
+  const main = document.getElementById('mainContent');
+  currentPage = page;
+
+  // 更新导航高亮
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.page === page);
+  });
+
+  if (page === 'home') {
+    main.innerHTML = renderHome();
+    loadAvatar();
+    loadTimerDefault();
+    updateTimerDisplay();
+    return;
+  }
+
+  if (page === 'homeCustom') {
+    const layout = Store.get('homeLayout') || [];
+    const cardNames = {
+      greeting: '👋 问候语',
+      todo: '✅ 今日计划',
+      pills: '💊 吃药打卡',
+      timer: '⏱️ 专注计时',
+      stats: '📊 数据双列',
+      schedule: '📅 内容排期',
+      ideas: '💡 选题池',
+      study: '📚 学习记录'
+    };
+    main.innerHTML = `
+      <div class="card">
+        <div class="card-header"><div class="card-icon">⚙️</div><div class="card-title">首页卡片定制</div></div>
+        <div class="card-body">
+          <p style="font-size:12px;opacity:0.6;margin-bottom:12px">开关控制显示/隐藏，箭头调整顺序</p>
+          ${layout.map((item, i) => `
+            <div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)">
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <button class="timer-btn secondary" style="width:28px;height:24px;padding:0;font-size:12px;${i === 0 ? 'opacity:0.3;pointer-events:none' : ''}" onclick="moveHomeCard(${i}, -1)">↑</button>
+                <button class="timer-btn secondary" style="width:28px;height:24px;padding:0;font-size:12px;${i === layout.length-1 ? 'opacity:0.3;pointer-events:none' : ''}" onclick="moveHomeCard(${i}, 1)">↓</button>
+              </div>
+              <span style="flex:1;font-size:14px;font-weight:600">${cardNames[item.id] || item.id}</span>
+              <button class="timer-btn secondary" style="width:auto;padding:6px 12px;font-size:12px" onclick="toggleHomeCard('${item.id}')">${item.show ? '✓ 显示' : '✕ 隐藏'}</button>
+            </div>
+          `).join('')}
+          <button class="timer-btn" style="margin-top:12px" onclick="renderPage(\'home\')">🏠 返回首页查看效果</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if (page === 'settings') {
+    const avatar = Store.get('avatar');
+    const avatarPreview = avatar ? `<img src="${avatar}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);box-shadow:0 0 16px var(--avatar-glow)">` : `<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent) 0%,#0ea5e9 100%);display:flex;align-items:center;justify-content:center;font-size:32px;border:3px solid var(--accent)">📚</div>`;
+    const isLight = document.body.classList.contains('light-mode');
+    main.innerHTML = `
+      <div class="card">
+        <div class="card-header"><div class="card-icon">⚙️</div><div class="card-title">设置</div></div>
+        <div class="card-body">
+          <div style="text-align:center;padding:20px 0">
+            <label for="avatarInput" style="cursor:pointer;display:inline-block">
+              ${avatarPreview}
+              <div style="margin-top:8px;font-size:13px;color:var(--accent);font-weight:600">👆 点击更换头像</div>
+            </label>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0">
+              <span style="font-size:14px;font-weight:600">深色 / 浅色模式</span>
+              <button class="timer-btn secondary" style="width:auto;padding:8px 16px" onclick="toggleTheme();renderPage('settings')">${isLight ? '🌙 切深色' : '☀️ 切浅色'}</button>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--border)">
+              <span style="font-size:14px;font-weight:600">首页卡片定制</span>
+              <button class="timer-btn secondary" style="width:auto;padding:8px 16px" onclick="renderPage(\'homeCustom\')">⚙️ 定制</button>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--border)">
+              <span style="font-size:14px;font-weight:600">清除所有数据</span>
+              <button class="timer-btn secondary" style="width:auto;padding:8px 16px;color:#ef4444;border-color:#ef4444" onclick="if(confirm('确定要清除所有数据吗？此操作不可恢复！')){localStorage.clear();location.reload()}">🗑 清除</button>
+            </div>
+          </div>
+          <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--greeting-sub);opacity:0.3">
+            米优的工作台 · 2026
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const titles = {
+    pills: '吃药打卡', todo: '今日计划', study: '学习记录',
+    duo: '多邻国', ideas: '选题池', schedule: '内容排期',
+    review: '每日复盘', materials: '素材库'
+  };
+  const icons = {
+    pills: '💊', todo: '✅', study: '📚', duo: '🦉',
+    ideas: '💡', schedule: '📅', review: '🌙', materials: '📝'
+  };
+
+  const pageRenderers = {
+    pills: renderPillsPage,
+    todo: renderTodoPage,
+    study: renderStudyPage,
+    duo: renderDuoPage,
+    ideas: renderIdeasPage,
+    schedule: renderSchedulePage,
+    review: renderReviewPage,
+    materials: renderMaterialsPage
+  };
+
+  if (pageRenderers[page]) {
+    main.innerHTML = pageRenderers[page]();
+  } else {
+    main.innerHTML = `
+      <div class="card">
+        <div class="card-header"><div class="card-icon">${icons[page]}</div><div class="card-title">${titles[page]}</div></div>
+        <div class="card-body">
+          <p style="text-align:center;padding:40px 0;opacity:0.5">${titles[page]} 详细页面</p>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function moveHomeCard(index, direction) {
+  const layout = Store.get('homeLayout') || [];
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= layout.length) return;
+  const temp = layout[index];
+  layout[index] = layout[newIndex];
+  layout[newIndex] = temp;
+  Store.set('homeLayout', layout);
+  renderPage('homeCustom');
+}
+
+function toggleHomeCard(id) {
+  const layout = Store.get('homeLayout') || [];
+  const item = layout.find(x => x.id === id);
+  if (item) {
+    item.show = !item.show;
+    Store.set('homeLayout', layout);
+    renderPage('homeCustom');
+  }
+}
+
+// ===== 导航点击 =====
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => renderPage(item.dataset.page));
+});
+
+// ===== 初始化 =====
+initData();
+applyTheme();
+renderPage('home');
+</script>
+</body>
+</html>
